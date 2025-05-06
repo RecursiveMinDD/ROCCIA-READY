@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, viewport-fit=cover">
+    <title>Order Confirmed - Roccia Hill Resort</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary: #1da96c;
+            --secondary: #1da96c;
+            --dark: #1a2a3a;
+            --light: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--dark);
+            min-height: 100vh;
+            background: #f8f9fa;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .confirmation-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .confirmation-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .success-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .success-icon {
+            color: var(--primary);
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        .success-title {
+            color: var(--primary);
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .success-message {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .details-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .details-section h2 {
+            color: var(--primary);
+            font-size: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .details-row:last-child {
+            border-bottom: none;
+        }
+
+        .details-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .details-value {
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .total-amount {
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(29, 169, 108, 0.2);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .confirmation-card {
+                padding: 20px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="confirmation-container">
+        <div class="confirmation-card">
+            <div class="success-header">
+                <i class="fas fa-check-circle success-icon"></i>
+                <h1 class="success-title">Booking Confirmed!</h1>
+                <p class="success-message">Thank you for choosing Roccia Hill Resort & Adventure Park</p>
+            </div>
+
+            <div class="details-section">
+                <h2><i class="fas fa-receipt"></i> Booking Details</h2>
+                <div id="bookingDetails">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="details-section">
+                <h2><i class="fas fa-user"></i> Customer Details</h2>
+                <div id="customerDetails">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="details-section">
+                <h2><i class="fas fa-money-bill-wave"></i> Payment Details</h2>
+                <div id="paymentDetails">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="index.html" class="btn btn-outline">
+                    <i class="fas fa-home"></i> Back to Home
+                </a>
+                <button onclick="downloadInvoice()" class="btn btn-primary">
+                    <i class="fas fa-download"></i> Download Invoice
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fade in the page
+            document.body.style.opacity = '1';
+
+            // Get booking and payment info from session storage
+            const bookingInfo = JSON.parse(sessionStorage.getItem('bookingInfo'));
+            const paymentInfo = JSON.parse(sessionStorage.getItem('paymentInfo'));
+
+            if (!bookingInfo || !paymentInfo) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Format date
+            const formatDate = (dateString) => {
+                return new Date(dateString).toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            };
+
+            // Populate Booking Details
+            const bookingDetails = document.getElementById('bookingDetails');
+            let bookingHTML = `
+                <div class="details-row">
+                    <span class="details-label">Booking ID</span>
+                    <span class="details-value">${paymentInfo.bookingId}</span>
+                </div>
+                <div class="details-row">
+                    <span class="details-label">Package</span>
+                    <span class="details-value">${bookingInfo.package.name}</span>
+                </div>
+                <div class="details-row">
+                    <span class="details-label">Date</span>
+                    <span class="details-value">${formatDate(bookingInfo.date)}</span>
+                </div>
+            `;
+
+            if (['villa', 'superdeluxe', 'tent'].includes(bookingInfo.package.type)) {
+                bookingHTML += `
+                    <div class="details-row">
+                        <span class="details-label">Adults</span>
+                        <span class="details-value">${bookingInfo.guests.adults}</span>
+                    </div>
+                    <div class="details-row">
+                        <span class="details-label">Children</span>
+                        <span class="details-value">${bookingInfo.guests.children}</span>
+                    </div>
+                    <div class="details-row">
+                        <span class="details-label">Rooms</span>
+                        <span class="details-value">${bookingInfo.rooms}</span>
+                    </div>
+                `;
+            } else {
+                bookingHTML += `
+                    <div class="details-row">
+                        <span class="details-label">Total Guests</span>
+                        <span class="details-value">${bookingInfo.guests.total}</span>
+                    </div>
+                `;
+            }
+            bookingDetails.innerHTML = bookingHTML;
+
+            // Populate Customer Details
+            const customerDetails = document.getElementById('customerDetails');
+            customerDetails.innerHTML = `
+                <div class="details-row">
+                    <span class="details-label">Name</span>
+                    <span class="details-value">${bookingInfo.customer.name}</span>
+                </div>
+                <div class="details-row">
+                    <span class="details-label">Email</span>
+                    <span class="details-value">${bookingInfo.customer.email}</span>
+                </div>
+                <div class="details-row">
+                    <span class="details-label">Phone</span>
+                    <span class="details-value">${bookingInfo.customer.phone}</span>
+                </div>
+            `;
+
+            // Populate Payment Details
+            const paymentDetails = document.getElementById('paymentDetails');
+            let paymentHTML = `
+                <div class="details-row">
+                    <span class="details-label">Payment ID</span>
+                    <span class="details-value">${paymentInfo.paymentId}</span>
+                </div>
+                <div class="details-row">
+                    <span class="details-label">Subtotal</span>
+                    <span class="details-value">${bookingInfo.summary.subtotal}</span>
+                </div>
+            `;
+
+            if (bookingInfo.promoCode.discount > 0) {
+                paymentHTML += `
+                    <div class="details-row">
+                        <span class="details-label">Promo Discount</span>
+                        <span class="details-value">-${bookingInfo.promoCode.discount}%</span>
+                    </div>
+                `;
+            }
+
+            paymentHTML += `
+                <div class="details-row">
+                    <span class="details-label">GST</span>
+                    <span class="details-value">${bookingInfo.summary.gst}</span>
+                </div>
+                <div class="details-row">
+                    <span class="details-label">Total Amount</span>
+                    <span class="details-value total-amount">${bookingInfo.summary.total}</span>
+                </div>
+            `;
+            paymentDetails.innerHTML = paymentHTML;
+        });
+
+        async function downloadInvoice() {
+            const bookingInfo = JSON.parse(sessionStorage.getItem('bookingInfo'));
+            const paymentInfo = JSON.parse(sessionStorage.getItem('paymentInfo'));
+
+            if (!bookingInfo || !paymentInfo) {
+                alert('Booking information not found');
+                return;
+            }
+
+            try {
+                // Initialize jsPDF
+                window.jsPDF = window.jspdf.jsPDF;
+                const doc = new jsPDF();
+
+                // Set font and colors
+                doc.setFont('helvetica');
+                doc.setFontSize(20);
+                doc.setTextColor(29, 169, 108); // Primary color
+
+                // Add header
+                doc.text('Roccia Hill Resort', 20, 20);
+                doc.setFontSize(12);
+                doc.text('Adventure Park', 20, 30);
+                doc.text('lakkadkot, maharastra, India', 20, 35);
+
+                // Add invoice details
+                doc.setTextColor(26, 42, 58); // Dark color
+                doc.text(`Invoice #: ${paymentInfo.bookingId}`, 20, 50);
+                doc.text(`Date: ${new Date(paymentInfo.date).toLocaleDateString()}`, 20, 57);
+
+                // Add line
+                doc.setDrawColor(29, 169, 108);
+                doc.line(20, 62, 190, 62);
+
+                // Customer Information
+                doc.setFontSize(14);
+                doc.text('Customer Information', 20, 75);
+                doc.setFontSize(10);
+                doc.text(`Name: ${bookingInfo.customer.name}`, 20, 85);
+                doc.text(`Email: ${bookingInfo.customer.email}`, 20, 92);
+                doc.text(`Phone: ${bookingInfo.customer.phone}`, 20, 99);
+
+                // Booking Details
+                doc.setFontSize(14);
+                doc.text('Booking Details', 20, 115);
+                doc.setFontSize(10);
+                doc.text(`Package: ${bookingInfo.package.name}`, 20, 125);
+                doc.text(`Date: ${new Date(bookingInfo.date).toLocaleDateString()}`, 20, 132);
+
+                // Guest Information
+                let yPos = 139;
+                if (['villa', 'superdeluxe', 'tent'].includes(bookingInfo.package.type)) {
+                    doc.text(`Adults: ${bookingInfo.guests.adults}`, 20, yPos);
+                    doc.text(`Children: ${bookingInfo.guests.children}`, 20, yPos + 7);
+                    doc.text(`Rooms: ${bookingInfo.rooms}`, 20, yPos + 14);
+                    yPos += 21;
+                } else {
+                    doc.text(`Total Guests: ${bookingInfo.guests.total}`, 20, yPos);
+                    yPos += 7;
+                }
+
+                // Add line
+                doc.line(20, yPos + 5, 190, yPos + 5);
+
+                // Payment Details
+                doc.setFontSize(14);
+                doc.text('Payment Details', 20, yPos + 20);
+                doc.setFontSize(10);
+
+                yPos += 30;
+                doc.text('Subtotal:', 20, yPos);
+                doc.text(bookingInfo.summary.subtotal, 150, yPos);
+
+                if (bookingInfo.promoCode.discount > 0) {
+                    yPos += 7;
+                    doc.text(`Promo Discount (${bookingInfo.promoCode.discount}%):`, 20, yPos);
+                    doc.text(`-${bookingInfo.promoCode.discount}%`, 150, yPos);
+                }
+
+                yPos += 7;
+                doc.text('GST:', 20, yPos);
+                doc.text(bookingInfo.summary.gst, 150, yPos);
+
+                yPos += 7;
+                doc.setFontSize(12);
+                doc.setTextColor(29, 169, 108);
+                doc.text('Total Amount:', 20, yPos);
+                doc.text(bookingInfo.summary.total, 150, yPos);
+
+                // Add payment confirmation
+                yPos += 20;
+                doc.setFontSize(10);
+                doc.setTextColor(26, 42, 58);
+                doc.text('Payment Status: Paid', 20, yPos);
+                doc.text(`Payment ID: ${paymentInfo.paymentId}`, 20, yPos + 7);
+                doc.text(`Transaction Date: ${new Date(paymentInfo.date).toLocaleString()}`, 20, yPos + 14);
+
+                // Add footer
+                doc.setFontSize(8);
+                doc.setTextColor(128, 128, 128);
+                doc.text('Thank you for choosing Roccia Hill Resort & Adventure Park !', 20, 270);
+                doc.text('For any queries, please contact: support@roccia.in | +91 90996 34000', 20, 275);
+                doc.text('lakkadkot, maharastra, India', 20, 280);
+
+                // Save the PDF
+                doc.save(`Roccia_Invoice_${paymentInfo.bookingId}.pdf`);
+
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error generating PDF. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>
